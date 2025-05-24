@@ -5,7 +5,6 @@ import os
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
-# Use actual visible channel name
 source_channel = "tatapunchgroup"
 target_channel = "https://t.me/+Ery86ayi9LpiM2Y1"
 
@@ -17,8 +16,9 @@ async def handler(event):
     text = msg.message or ""
 
     print("📩 New message detected!")
+    print(f"📦 Message content: '{text}'")
 
-    # Skip if there's a link
+    # Skip messages with links
     if any(link in text.lower() for link in ["http", "https", "t.me"]):
         print("⛔ Skipped due to link in message.")
         return
@@ -32,12 +32,10 @@ async def handler(event):
                 caption=text
             )
             print("✅ Media sent successfully.")
-        elif text:
-            print("💬 Text message detected.")
-            await client.send_message(target_channel, text)
-            print("✅ Text sent successfully.")
         else:
-            print("⚠️ Message has no content or media.")
+            print("💬 Text message detected. Sending...")
+            await client.send_message(target_channel, text.strip() or "📤 [No text content]")
+            print("✅ Text sent successfully.")
     except Exception as e:
         print(f"❌ Error while sending: {e}")
 
