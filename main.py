@@ -23,12 +23,16 @@ async def handler(event):
         return
 
     if msg.media:
-        print("📸 Media message detected.")
-        await client.send_file(
-            target_channel,
-            file=msg.media,
-            caption=text
-        )
+        try:
+            print("📸 Media message detected. Attempting to send...")
+            await client.send_file(
+                target_channel,
+                file=msg.media,
+                caption=text
+            )
+            print("✅ Media sent successfully.")
+        except Exception as e:
+            print(f"❌ Media failed: {e}")
     elif text:
         print("💬 Text message detected.")
         await client.send_message(target_channel, text)
