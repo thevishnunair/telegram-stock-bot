@@ -6,7 +6,7 @@ api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
 # Define source and target channels
-source_channel = "https://t.me/+I7XfJ2something"  # Replace with your actual source channel invite link
+source_channel = "https://t.me/tatapunchgroup"  # Replace with your actual source channel invite link
 target_channel = "https://t.me/+Ery86ayi9LpiM2Y1"  # Already known target channel
 
 # Initialize the Telegram client
