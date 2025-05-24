@@ -4,7 +4,7 @@ import os
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
-source_channel = "https://t.me/ModernTradingReal"
+source_channel = "https://t.me/owltradingcalls"
 target_channel = "https://t.me/+Ery86ayi9LpiM2Y1"
 
 client = TelegramClient("stock_session", api_id, api_hash)
