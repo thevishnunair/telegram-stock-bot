@@ -11,9 +11,19 @@ client = TelegramClient("stock_session", api_id, api_hash)
 
 @client.on(events.NewMessage(chats=source_channel))
 async def handler(event):
-    message = event.message.message
-    if message and not any(link in message.lower() for link in ["http", "https", "t.me"]):
-        await client.send_message(target_channel, message)
+    message = event.message
 
-client.start()
-client.run_until_disconnected()
+    # Skip if message contains a link
+    if message.message and any(link in message.message.lower() for link in ["http", "https", "t.me"]):
+        return
+
+    # If it's a media post (image, video, file, etc.)
+    if message.media:
+        await client.send_file(
+            target_channel,
+            file=message.media,
+            caption=message.message or ""
+        )
+    else:
+        # Plain text
+        await client.send_message(target_channel, message.message)
