@@ -1,15 +1,14 @@
 from telethon import TelegramClient, events
 import os
 
-# Fetch environment variables
+# Environment variables
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
-# Define source and target channels
-source_channel = "https://t.me/+I7XfJ2something"  # Replace with actual source invite link
+# Use actual visible channel name as seen in Telegram
+source_channel = "tatapunchgroup"
 target_channel = "https://t.me/+Ery86ayi9LpiM2Y1"
 
-# Initialize the Telegram client
 client = TelegramClient("stock_session", api_id, api_hash)
 
 @client.on(events.NewMessage(chats=source_channel))
@@ -19,7 +18,6 @@ async def handler(event):
 
     print("📩 New message detected!")
 
-    # Skip messages with links
     if any(link in text.lower() for link in ["http", "https", "t.me"]):
         print("⛔ Skipped due to link in message.")
         return
