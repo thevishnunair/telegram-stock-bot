@@ -1,6 +1,7 @@
 from telethon import TelegramClient, events
 import asyncio
 import os
+from telethon.tl.types import MessageMediaDocument, DocumentAttributeVideo
 
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
@@ -14,7 +15,14 @@ def contains_link(text):
     text = text.lower()
     return any(link in text for link in ["http", "https", "t.me", ".com", ".in"])
 
-# Album (carousel) handler
+def is_video(msg):
+    if isinstance(msg.media, MessageMediaDocument):
+        for attr in msg.document.attributes:
+            if isinstance(attr, DocumentAttributeVideo):
+                return True
+    return False
+
+# ✅ Allow albums even if they contain videos
 @client.on(events.Album(chats=source_channel))
 async def album_handler(event):
     print("🎞️ Album received.")
@@ -39,7 +47,7 @@ async def album_handler(event):
     except Exception as e:
         print(f"❌ Error posting album: {e}")
 
-# Single message handler
+# ❌ Block standalone video messages
 @client.on(events.NewMessage(chats=source_channel))
 async def handler(event):
     msg = event.message
@@ -56,8 +64,12 @@ async def handler(event):
         print("⛔ Skipped: Forwarded content.")
         return
 
+    if is_video(msg):
+        print("⛔ Skipped: Single video message.")
+        return
+
     try:
-        await asyncio.sleep(0.5)  # Delay to maintain order
+        await asyncio.sleep(0.5)
         if msg.media:
             print("📸 Media message detected. Sending...")
             await client.send_file(
