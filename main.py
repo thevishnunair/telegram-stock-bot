@@ -1,93 +1,53 @@
-from telethon import TelegramClient, events
-import asyncio
+
 import os
-from telethon.tl.types import MessageMediaDocument, DocumentAttributeVideo
+import asyncio
+from telethon import TelegramClient, events
+from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
+api_id = int(os.getenv('API_ID'))
+api_hash = os.getenv('API_HASH')
+session_name = os.getenv('SESSION_NAME', 'stock_session')
+source_channel = os.getenv('SOURCE_CHANNEL')
+destination_channel = os.getenv('DESTINATION_CHANNEL')
 
-source_channel = "https://t.me/tradevixtrust1"
-target_channel = "https://t.me/+Ery86ayi9LpiM2Y1"
+client = TelegramClient(session_name, api_id, api_hash)
 
-client = TelegramClient("stock_session", api_id, api_hash)
-
-def contains_link(text):
-    text = text.lower()
-    return any(link in text for link in ["http", "https", "t.me", ".com", ".in"])
-
-def is_video(msg):
-    if isinstance(msg.media, MessageMediaDocument):
-        for attr in msg.document.attributes:
-            if isinstance(attr, DocumentAttributeVideo):
-                return True
-    return False
-
-# ✅ Allow albums even if they contain videos
-@client.on(events.Album(chats=source_channel))
-async def album_handler(event):
-    print("🎞️ Album received.")
-    first_msg = event.messages[0]
-
-    if first_msg.forward:
-        print("⛔ Skipped album: Forwarded content.")
-        return
-
-    caption = first_msg.message or first_msg.text or ""
-    if contains_link(caption):
-        print("⛔ Skipped album: Contains link.")
-        return
-
-    try:
-        await client.send_file(
-            target_channel,
-            [msg.media for msg in event.messages],
-            caption=caption.strip() or "📸"
-        )
-        print("✅ Album posted.")
-    except Exception as e:
-        print(f"❌ Error posting album: {e}")
-
-# ❌ Block standalone video messages
 @client.on(events.NewMessage(chats=source_channel))
 async def handler(event):
-    msg = event.message
-    text = msg.message or msg.text or ""
-
-    print("📩 New message received.")
-    print(f"📦 Content: '{text}'")
-
-    if contains_link(text):
-        print("⛔ Skipped: Link found.")
-        return
-
-    if msg.forward:
-        print("⛔ Skipped: Forwarded content.")
-        return
-
-    if is_video(msg):
-        print("⛔ Skipped: Single video message.")
-        return
-
     try:
-        await asyncio.sleep(0.5)
-        if msg.media:
-            print("📸 Media message detected. Sending...")
-            await client.send_file(
-                target_channel,
-                file=msg.media,
-                caption=text.strip() or "📸"
-            )
-            print("✅ Media sent.")
-        else:
-            print("💬 Text message detected. Sending...")
-            await client.send_message(
-                target_channel,
-                text.strip() or "📤 [No text content]"
-            )
-            print("✅ Text sent.")
-    except Exception as e:
-        print(f"❌ Error sending message: {e}")
+        message = event.message
 
-print("✅ Bot is running... waiting for messages.")
-client.start()
-client.run_until_disconnected()
+        # Skip if it's a video or a live stream
+        if message.video or message.video_note or message.document and message.document.mime_type and "video" in message.document.mime_type:
+            print("Skipped a video or live stream.")
+            return
+
+        # Skip if it's part of an album with a video
+        if message.grouped_id:
+            messages = await client.get_messages(source_channel, grouped_id=message.grouped_id)
+            if any(m.video or m.video_note or (m.document and m.document.mime_type and "video" in m.document.mime_type) for m in messages):
+                print("Skipped album with a video.")
+                return
+            for m in messages:
+                if m.photo or (m.document and m.document.mime_type.startswith("image")):
+                    await client.send_file(destination_channel, m.media, caption=m.text if m.text else None)
+            return
+
+        # Post individual image with caption or text-only messages
+        if message.photo or (message.document and message.document.mime_type.startswith("image")):
+            await client.send_file(destination_channel, message.media, caption=message.text if message.text else None)
+        elif message.text:
+            await client.send_message(destination_channel, message.text)
+        else:
+            print("Skipped unsupported media type.")
+
+    except Exception as e:
+        print("Error while handling message:", e)
+
+async def main():
+    await client.start()
+    print("✅ Bot is running... waiting for messages.")
+    await client.run_until_disconnected()
+
+if __name__ == '__main__':
+    asyncio.run(main())
