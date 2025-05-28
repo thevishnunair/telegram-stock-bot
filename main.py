@@ -6,7 +6,7 @@ from telethon.tl.types import MessageMediaPhoto
 api_id = int(os.getenv('API_ID'))
 api_hash = os.getenv('API_HASH')
 session_name = 'stock_session'
-source_channel = 'https://t.me/TradewixTrust'
+source_channel = 'https://t.me/tatapunchgroup'
 destination_channel = 'https://t.me/+Ery86ayi9LpiM2Y1'
 
 client = TelegramClient(session_name, api_id, api_hash)
