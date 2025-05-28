@@ -1,31 +1,47 @@
 
 import os
+import re
 from telethon import TelegramClient, events
-from telethon.tl.types import MessageMediaPhoto
+from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 
-api_id = int(os.getenv('API_ID'))
-api_hash = os.getenv('API_HASH')
-session_name = 'stock_session'
-source_channel = 'https://t.me/tatapunchgroup'
-destination_channel = 'https://t.me/+Ery86ayi9LpiM2Y1'
+api_id = int(os.environ.get("API_ID"))
+api_hash = os.environ.get("API_HASH")
+session_name = "stock_session"
+source_channel = os.environ.get("SOURCE_CHANNEL")  # Exact username or ID (e.g., 'source_channel')
+destination_channel = os.environ.get("DESTINATION_CHANNEL")  # Exact username or ID (e.g., 'destination_channel')
+
+def contains_link(text):
+    return bool(re.search(r'https?://|t\.me/|www\.', text or ''))
+
+def is_allowed_album(messages):
+    return all(
+        isinstance(m.media, MessageMediaPhoto) and not contains_link(m.message)
+        for m in messages if m.media
+    )
 
 client = TelegramClient(session_name, api_id, api_hash)
 
+@client.on(events.Album())
+async def handler_album(event):
+    if event.chat.username != source_channel.lstrip("@"):
+        return
+    if is_allowed_album(event.messages):
+        await client.send_album(destination_channel, event.messages)
+
 @client.on(events.NewMessage(chats=source_channel))
 async def handler(event):
-    if event.message.video or event.message.document and 'video' in event.message.document.mime_type:
+    if event.grouped_id:
+        return  # skip single message in an album; handled separately
+    msg = event.message
+    if contains_link(msg.message):
         return
-
-    if event.message.grouped_id and event.message.media:
-        messages = await client.get_messages(source_channel, grouped_id=event.message.grouped_id)
-        for msg in messages:
-            if msg.video or (msg.document and 'video' in msg.document.mime_type):
-                return
-
-    if event.message.media and isinstance(event.message.media, MessageMediaPhoto):
-        await client.send_file(destination_channel, event.message.media, caption=event.message.text or "")
-    elif event.message.message:
-        await client.send_message(destination_channel, event.message.message)
+    if msg.media:
+        if isinstance(msg.media, MessageMediaPhoto):
+            await client.send_file(destination_channel, file=msg.media, caption=msg.message or "")
+        elif isinstance(msg.media, MessageMediaDocument):
+            return  # skip videos, documents, etc.
+    else:
+        await client.send_message(destination_channel, msg.message)
 
 print("✅ Bot is running... waiting for messages.")
 client.start()
