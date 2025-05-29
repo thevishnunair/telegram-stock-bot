@@ -6,7 +6,7 @@ api_id = 23553689
 api_hash = '8fd8cfa43b86a969bb25e7fe8682628a'
 
 # Replace below with your actual base64 session string
-session_string = "PASTE_YOUR_SESSION_STRING_HERE"
+session_string = "1BVtsOJsBu49O_n4WIZ-IknmMyfIZO4PdF_k7smzx7-5SMTnDTpX824FQWR2TnKfLZHE0GsNnghh7AEmp8-DxBQuIOwwO8raEgA4Lk96VeVxGjJW6akeCf3FqIh8X3Mg-ULu32hI4PBf-R8aRKiIuiyiTafPVCBbNH4idArbeUJyoLHSMMJ_ucPxJos2z5hE2psYndLKShy2m7yyndSxumEHMiiJSBhZHDsDlQvWzWXz1k_wTDxvrjLlGiGw-BpKPtD3YiEAkVQY3BYgCtlTT4LVHVGW-jQ3KuM1L8PaeL1ExoQz8Zfbkjs_YqgAqKrnUyorFA6wpMIXb46oZnQh9jm-VeBntVWo="
 
 source_channel = 'https://t.me/tatapunchgroup'
 destination_channel = 'https://t.me/+Ery86ayi9LpiM2Y1'
