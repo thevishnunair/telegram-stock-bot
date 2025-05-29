@@ -4,7 +4,7 @@ from telethon.tl.types import MessageMediaPhoto
 
 api_id = 23553689
 api_hash = '8fd8cfa43b86a969bb25e7fe8682628a'
-source_channel = 'https://t.me/tatapunchgroup'
+source_channel = 'https://t.me/tradevixtrust1'
 destination_channel = 'https://t.me/+Ery86ayi9LpiM2Y1'
 
 client = TelegramClient('stock_session', api_id, api_hash)
