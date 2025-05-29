@@ -1,10 +1,9 @@
 from telethon.sync import TelegramClient
+from telethon.sessions import StringSession
 
-# Replace with your actual values
-api_id = 12345678
-api_hash = 'your_api_hash_here'
+api_id = 23553689
+api_hash = '8fd8cfa43b86a969bb25e7fe8682628a'
 
-with TelegramClient('render_session', api_id, api_hash) as client:
-    session_string = client.session.save()
-    print("\n✅ COPY THIS BASE64 SESSION STRING:\n")
-    print(session_string)
+with TelegramClient(StringSession(), api_id, api_hash) as client:
+    print("✅ COPY THIS BASE64 SESSION STRING:")
+    print(client.session.save())
