@@ -1,3 +1,4 @@
+
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from telethon.tl.types import MessageMediaPhoto
@@ -5,7 +6,6 @@ from telethon.tl.types import MessageMediaPhoto
 api_id = 23553689
 api_hash = '8fd8cfa43b86a969bb25e7fe8682628a'
 
-# Replace below with your actual base64 session string
 session_string = "1BVtsOJsBu49O_n4WIZ-IknmMyfIZO4PdF_k7smzx7-5SMTnDTpX824FQWR2TnKfLZHE0GsNnghh7AEmp8-DxBQuIOwwO8raEgA4Lk96VeVxGjJW6akeCf3FqIh8X3Mg-ULu32hI4PBf-R8aRKiIuiyiTafPVCBbNH4idArbeUJyoLHSMMJ_ucPxJos2z5hE2psYndLKShy2m7yyndSxumEHMiiJSBhZHDsDlQvWzWXz1k_wTDxvrjLlGiGw-BpKPtD3YiEAkVQY3BYgCtlTT4LVHVGW-jQ3KuM1L8PaeL1ExoQz8Zfbkjs_YqgAqKrnUyorFA6wpMIXb46oZnQh9jm-VeBntVWo="
 
 source_channel = 'https://t.me/tradevixtrust1'
@@ -31,12 +31,9 @@ async def handler(event):
         await client.send_message(destination_channel, message.text)
         return
 
-    if isinstance(message.media, MessageMediaPhoto) and not message.text:
-        await client.send_file(destination_channel, message.media.photo)
-        return
-
-    if isinstance(message.media, MessageMediaPhoto) and message.text:
-        await client.send_file(destination_channel, message.media.photo, caption=message.text)
+    if isinstance(message.media, MessageMediaPhoto):
+        file = await message.download_media()
+        await client.send_file(destination_channel, file, caption=message.text if message.text else None)
         return
 
     if hasattr(event, 'grouped_id') and event.grouped_id:
@@ -45,7 +42,7 @@ async def handler(event):
         media_files = []
         for m in messages:
             if isinstance(m.media, MessageMediaPhoto):
-                media_files.append(m.media.photo)
+                media_files.append(await m.download_media())
             else:
                 return
         await client.send_file(destination_channel, media_files)
